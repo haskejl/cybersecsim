@@ -4,13 +4,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-static SDL_Window* window = NULL;
-static SDL_Surface* surface = NULL;
-static SDL_Renderer* renderer = NULL;
-static SDL_Texture* texture = NULL;
-static TTF_Font* font = NULL;
-
-void draw_screen();
+void add_rect_to_scene(SDL_Rect* rect);
+void clear_scene();
+void draw_scene();
 int init_gfx();
 void shutdown_gfx();
+
 #endif

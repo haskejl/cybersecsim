@@ -6,23 +6,25 @@ const int SCREEN_WIDTH = 1280;
 const SDL_Color BLACK = {0, 0, 0, 255};
 const SDL_Color WHITE = {255, 255, 255, 255};
 
-void draw_screen() {
+static SDL_Window* window = NULL;
+static SDL_Surface* surface = NULL;
+static SDL_Renderer* scene = NULL;
+static SDL_Texture* texture = NULL;
+static TTF_Font* font = NULL;
+
+void add_rect_to_scene(SDL_Rect* rect) {
+	SDL_RenderFillRect(scene, rect);
+}
+
+void clear_scene() {
 	// Clear the renderer
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	// Draw to renderer
-	SDL_Rect test;
-	test.x = 10;
-	test.y = 10;
-	test.w = 100;
-	test.h = 100;
+	SDL_SetRenderDrawColor(scene, 0, 0, 0, 255);
+	SDL_RenderClear(scene);
+	SDL_SetRenderDrawColor(scene, 255, 255, 255, 255);
+}
 
-	SDL_RenderDrawRect(renderer, &test);
-	SDL_RenderFillRect(renderer, &test);
-
-	// Display renderer
-	SDL_RenderPresent(renderer);
+void draw_scene() {
+	SDL_RenderPresent(scene);
 }
 
 int init_gfx() {
@@ -42,8 +44,8 @@ int init_gfx() {
 		return -1;
 	}
 
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
-	if(renderer == NULL) {
+	scene = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
+	if(scene == NULL) {
 		printf("ERROR: SDL failed to create renderer! %s\n", SDL_GetError());
 		return -1;
 	}
@@ -61,7 +63,6 @@ int init_gfx() {
 	}
 	return 0;
 }
-
 
 void shutdown_gfx() {
 	TTF_Quit();
