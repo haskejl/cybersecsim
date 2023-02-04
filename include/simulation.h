@@ -1,8 +1,12 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include <SDL2/SDL.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "entity.h"
 #include "graphics.h"
 
 void run_simulation();
+
 #endif

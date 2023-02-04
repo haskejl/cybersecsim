@@ -12,7 +12,13 @@ static SDL_Renderer* scene = NULL;
 static SDL_Texture* texture = NULL;
 static TTF_Font* font = NULL;
 
-void add_rect_to_scene(SDL_Rect* rect) {
+void add_entity_to_scene(struct EntityNode *en) {
+	SDL_SetRenderDrawColor(scene, en->red, en->green, en->blue, en->alpha);
+	SDL_RenderFillRect(scene, &en->rect);
+}
+
+void add_rect_to_scene(SDL_Rect *rect, int r, int g, int b, int a) {
+	SDL_SetRenderDrawColor(scene, r, g, b, a);
 	SDL_RenderFillRect(scene, rect);
 }
 
