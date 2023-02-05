@@ -2,17 +2,18 @@
 
 void run_simulation() {
 	int quit = 0;
-	int proj_active = 0;
 	SDL_Event event;
 	time_t tim;
 	srand((unsigned) time(&tim));
-	int next_proj = (int)((rand()/(float)RAND_MAX)*1000.f+20.f);
 
+	const int N_PACKETS = 100;
+	int visible_packets = 0;
+	int next_attack = 10;//(int)(rand()/(float)RAND_MAX * 1000.f + 200.f);
 
 	struct EntityNode hacker;
 	struct EntityNode internet;
 	struct EntityNode server;
-	struct Packet packet;
+	struct Packet packets[N_PACKETS];
 
 	set_entity_col(&hacker, 255, 0, 0, 0);
 	set_entity_col(&internet, 0, 0, 255, 0);
@@ -42,19 +43,21 @@ void run_simulation() {
 		add_entity_to_scene(&hacker);
 		add_entity_to_scene(&internet);
 		add_entity_to_scene(&server);
+		
+		// 10% chance of attack being generated
+		if(next_attack == 0) {
+			send_attack(&hacker, &server, &packets[visible_packets++]);
+			next_attack = 10;//(int)(rand()/(float)RAND_MAX * 1000.f + 50.f);
+		}
+		next_attack--;
+		int remove_n_packets = 0;
+		for(int i=0; i<visible_packets; i++) {
+			// TODO: This is treats them like a stack, need to make these into a linked list
+			remove_n_packets += handle_packet(&packets[i]);
+			add_entity_to_scene((struct EntityNode*)&packets[i]);
+		}
+		visible_packets += remove_n_packets;
 
-		if(next_proj <= 0) {
-			proj_active = 1;
-			send_attack(&hacker, &server, &packet);
-			next_proj = (int)((rand()/(float)RAND_MAX)*1000.f+200.f);
-		} else {
-			next_proj--;
-		}
-		if(proj_active) {
-			move_packet(&packet);
-			if(SDL_HasIntersection(&packet.rect, &packet.dest->rect)) proj_active = 0;
-			add_entity_to_scene((struct EntityNode*)&packet);
-		}
 		draw_scene();
 	}
 }

@@ -21,12 +21,14 @@ struct Packet {
 	int green;
 	int blue;
 	int alpha;
+	struct EntityNode* src;
 	struct EntityNode* origin;
 	struct EntityNode* dest;
 	enum PacketType type;
 	int n_records;
 };
 
+int handle_packet(struct Packet* p);
 void move_packet(struct Packet* p);
 void send_attack(struct EntityNode* attacker, struct EntityNode* defender, struct Packet *p);
 

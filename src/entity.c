@@ -1,10 +1,23 @@
 #include "../include/entity.h"
 
+int handle_packet(struct Packet* p) {
+	if(SDL_HasIntersection(&p->rect, &p->dest->rect)) {
+		if(p->type == malicious_traffic && p->dest == p->src) {
+			return -1;
+		} else {
+			p->origin = p->dest;
+			p->dest = p->src;
+		}
+	}
+	move_packet(p);
+	return 0;
+}
+
 void move_packet(struct Packet* p) {
 	if(abs(p->dest->rect.x-p->rect.x) > abs(p->dest->rect.y-p->rect.y)) {
-		p->rect.x++;
+		p->rect.x += (p->dest->rect.x > p->rect.x) - (p->rect.x > p->dest->rect.x);
 	} else {
-		p->rect.y++;
+		p->rect.y += (p->dest->rect.y > p->rect.y) - (p->rect.y > p->dest->rect.y);
 	}
 }
 
@@ -16,6 +29,7 @@ void send_attack(struct EntityNode* attacker, struct EntityNode* defender, struc
 
 	set_entity_col((struct EntityNode*)p, attacker->red, attacker->green, attacker->blue, attacker->alpha);
 
+	p->src = attacker;
 	p->origin = attacker;
 	p->dest = defender;
 }
