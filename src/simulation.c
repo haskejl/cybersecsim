@@ -12,7 +12,7 @@ void run_simulation() {
 	struct EntityNode hacker;
 	struct EntityNode internet;
 	struct EntityNode server;
-	struct Projectile proj;
+	struct Packet packet;
 
 	set_entity_col(&hacker, 255, 0, 0, 0);
 	set_entity_col(&internet, 0, 0, 255, 0);
@@ -45,15 +45,15 @@ void run_simulation() {
 
 		if(next_proj <= 0) {
 			proj_active = 1;
-			send_attack(&hacker, &server, &proj);
+			send_attack(&hacker, &server, &packet);
 			next_proj = (int)((rand()/(float)RAND_MAX)*1000.f+200.f);
 		} else {
 			next_proj--;
 		}
 		if(proj_active) {
-			move_projectile(&proj);
-			if(proj.rect.x == proj.x_dest && proj.rect.y == proj.y_dest) proj_active = 0;
-			add_entity_to_scene((struct EntityNode*)&proj);
+			move_packet(&packet);
+			if(SDL_HasIntersection(&packet.rect, &packet.dest->rect)) proj_active = 0;
+			add_entity_to_scene((struct EntityNode*)&packet);
 		}
 		draw_scene();
 	}
