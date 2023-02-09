@@ -1,37 +1,83 @@
 #include "../include/entity.h"
 
-int handle_packet(struct Packet* p) {
-	if(SDL_HasIntersection(&p->rect, &p->dest->rect)) {
-		if(p->type == malicious_traffic && p->dest == p->src) {
-			return -1;
-		} else {
-			p->origin = p->dest;
-			p->dest = p->src;
+void handlePackets(struct PacketList* pl) {
+	if(pl->head != NULL) {
+		struct Packet* p = pl->head;
+		struct Packet* prev = NULL;
+		while(p != NULL) {
+			// Check for intersection
+			if(SDL_HasIntersection(&p->rect, &p->dest->rect)) {
+				if(p->type == malicious_traffic && p->dest == p->src) {
+					//remove the packet
+					if(p == pl->head) {
+						p->next = pl->freeHead;
+						pl->freeHead = p;
+						pl->head = NULL;
+					} else {
+						prev->next = p->next;
+						p->next = pl->freeHead;
+						pl->freeHead = p;
+					}
+				} else {
+					p->origin = p->dest;
+					p->dest = p->src;
+				}
+			}
+			// Move the packets
+			if(abs(p->dest->rect.x-p->rect.x) > abs(p->dest->rect.y-p->rect.y)) {
+				p->rect.x += (p->dest->rect.x > p->rect.x) - (p->rect.x > p->dest->rect.x);
+			} else {
+				p->rect.y += (p->dest->rect.y > p->rect.y) - (p->rect.y > p->dest->rect.y);
+			}
+
+			// get ready for next packets
+			prev = p;
+			p = p->next;
 		}
-	}
-	move_packet(p);
-	return 0;
+	} 
 }
 
-void move_packet(struct Packet* p) {
-	if(abs(p->dest->rect.x-p->rect.x) > abs(p->dest->rect.y-p->rect.y)) {
-		p->rect.x += (p->dest->rect.x > p->rect.x) - (p->rect.x > p->dest->rect.x);
+void initPacketList(struct PacketList *pl) {
+	pl->head = NULL;
+	pl->tail = NULL;
+	pl->freeHead = pl->memStart = calloc(100, sizeof(struct Packet));
+	if(pl->memStart == NULL) {
+		printf("Something went wrong initializing the PacketList\n");
+	}
+	
+	for(int i=0; i<99; i++) {
+		pl->freeHead[i].next = &pl->freeHead[i+1];
+		pl->freeHead[i].rect.h = 8;
+		pl->freeHead[i].rect.w = 8;
+	}
+	pl->freeHead[99].rect.h = 8;
+	pl->freeHead[99].rect.w = 8;
+}
+
+void sendAttack(struct EntityNode* attacker, struct EntityNode* defender, struct PacketList* pl) {
+	if(pl->freeHead == NULL) {
+		printf("Failed to add more packets, out of packets\n");
 	} else {
-		p->rect.y += (p->dest->rect.y > p->rect.y) - (p->rect.y > p->dest->rect.y);
+		struct Packet* toAdd = pl->freeHead;
+		pl->freeHead = pl->freeHead->next;
+
+		toAdd->rect.x = attacker->rect.x + attacker->rect.w;
+		toAdd->rect.y = attacker->rect.y + 4;
+		toAdd->next = NULL;
+		toAdd->src = attacker;
+		toAdd->origin = attacker;
+		toAdd->dest = defender;
+
+		if(pl->tail == NULL) {
+			pl->head = pl->tail = toAdd;
+		} else {
+			pl->tail->next = toAdd;
+			pl->tail = toAdd;
+		}
+
+		set_entity_col((struct EntityNode*)toAdd, attacker->red, attacker->green, attacker->blue, attacker->alpha);
+
 	}
-}
-
-void send_attack(struct EntityNode* attacker, struct EntityNode* defender, struct Packet* p) {
-	p->rect.x = attacker->rect.x + attacker->rect.w;
-	p->rect.y = attacker->rect.y + 4;
-	p->rect.h = 8;
-	p->rect.w = 8;
-
-	set_entity_col((struct EntityNode*)p, attacker->red, attacker->green, attacker->blue, attacker->alpha);
-
-	p->src = attacker;
-	p->origin = attacker;
-	p->dest = defender;
 }
 
 void set_entity_col(struct EntityNode *en, const int r, const int g, const int b, const int a) {

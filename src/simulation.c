@@ -8,19 +8,20 @@ void run_simulation() {
 
 	const int N_PACKETS = 100;
 	int visible_packets = 0;
-	int next_attack = 10;//(int)(rand()/(float)RAND_MAX * 1000.f + 200.f);
 
 	struct EntityNode hacker;
 	struct EntityNode internet;
 	struct EntityNode server;
-	struct Packet packets[N_PACKETS];
+	struct PacketList packetList;
+
+	initPacketList(&packetList);
 
 	set_entity_col(&hacker, 255, 0, 0, 0);
 	set_entity_col(&internet, 0, 0, 255, 0);
 	set_entity_col(&server, 0, 255, 0, 0);
 	set_entity_loc(&hacker, 100, 100);
-	set_entity_loc(&internet, 200, 100);
-	set_entity_loc(&server, 300, 100);
+	set_entity_loc(&internet, 500, 100);
+	set_entity_loc(&server, 1000, 100);
 	set_entity_size(&hacker, 16, 16);
 	set_entity_size(&internet, 16, 16);
 	set_entity_size(&server, 16, 16);
@@ -37,26 +38,24 @@ void run_simulation() {
 			}
 		}
 
-
 		clear_scene();
 		// add objs to renderer;
 		add_entity_to_scene(&hacker);
 		add_entity_to_scene(&internet);
 		add_entity_to_scene(&server);
 		
-		// 10% chance of attack being generated
-		if(next_attack == 0) {
-			send_attack(&hacker, &server, &packets[visible_packets++]);
-			next_attack = 10;//(int)(rand()/(float)RAND_MAX * 1000.f + 50.f);
+		// 1% chance of attack being generated
+		if(rand()/(float)RAND_MAX > 0.99) {
+			sendAttack(&hacker, &server, &packetList);
 		}
-		next_attack--;
-		int remove_n_packets = 0;
-		for(int i=0; i<visible_packets; i++) {
-			// TODO: This is treats them like a stack, need to make these into a linked list
-			remove_n_packets += handle_packet(&packets[i]);
-			add_entity_to_scene((struct EntityNode*)&packets[i]);
+		handlePackets(&packetList);
+
+		struct Packet* curr = packetList.head;
+		while(curr != NULL) {
+			//add_entity_to_scene((struct EntityNode*)&curr);
+			add_rect_to_scene(&curr->rect, curr->red, curr->green, curr->blue, curr->alpha);
+			curr = curr->next;
 		}
-		visible_packets += remove_n_packets;
 
 		draw_scene();
 	}

@@ -26,11 +26,19 @@ struct Packet {
 	struct EntityNode* dest;
 	enum PacketType type;
 	int n_records;
+	struct Packet* next;
 };
 
-int handle_packet(struct Packet* p);
-void move_packet(struct Packet* p);
-void send_attack(struct EntityNode* attacker, struct EntityNode* defender, struct Packet *p);
+struct PacketList {
+	struct Packet* head;
+	struct Packet* tail;
+	struct Packet* freeHead;
+	struct Packet* memStart;
+};
+
+void handlePackets(struct PacketList* pl);
+void initPacketList(struct PacketList* pl);
+void sendAttack(struct EntityNode* attacker, struct EntityNode* defender, struct PacketList* pl);
 
 void set_entity_col(struct EntityNode* en, const int r, const int g, const int b, const int a);
 void set_entity_loc(struct EntityNode* en, const int x, const int y);

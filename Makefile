@@ -14,3 +14,6 @@ OBJ_NAME = program
 #compile
 all : $(OBJS)
 	$(CC) $(OBJS) $(CFLAGS) $(LINKER_FLAGS) -o ./bin/$(OBJ_NAME)
+
+debug: $(OBJS)
+	$(CC) $(OBJS) $(CFLAGS) $(LINKER_FLAGS) -ggdb -o ./bin/$(OBJ_NAME)
