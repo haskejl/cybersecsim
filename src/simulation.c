@@ -59,4 +59,6 @@ void run_simulation() {
 
 		draw_scene();
 	}
+
+	freePacketList(&packetList);
 }

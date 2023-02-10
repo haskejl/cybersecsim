@@ -36,6 +36,7 @@ struct PacketList {
 	struct Packet* memStart;
 };
 
+void freePacketList(struct PacketList* pl);
 void handlePackets(struct PacketList* pl);
 void initPacketList(struct PacketList* pl);
 void sendAttack(struct EntityNode* attacker, struct EntityNode* defender, struct PacketList* pl);

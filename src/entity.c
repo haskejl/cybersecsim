@@ -1,5 +1,13 @@
 #include "../include/entity.h"
 
+void freePacketList(struct PacketList* pl) {
+	free(pl->memStart);
+	pl->memStart = NULL;
+	pl->head = NULL;
+	pl->tail = NULL;
+	pl->freeHead = NULL;
+}
+
 void handlePackets(struct PacketList* pl) {
 	if(pl->head != NULL) {
 		struct Packet* p = pl->head;
@@ -7,17 +15,19 @@ void handlePackets(struct PacketList* pl) {
 		while(p != NULL) {
 			// Check for intersection
 			if(SDL_HasIntersection(&p->rect, &p->dest->rect)) {
-				if(p->type == malicious_traffic && p->dest == p->src) {
+				if(p->dest == p->src) {
 					//remove the packet
 					if(p == pl->head) {
+						pl->head = pl->head->next;
 						p->next = pl->freeHead;
 						pl->freeHead = p;
-						pl->head = NULL;
 					} else {
 						prev->next = p->next;
 						p->next = pl->freeHead;
 						pl->freeHead = p;
 					}
+					p = prev->next;
+					continue;
 				} else {
 					p->origin = p->dest;
 					p->dest = p->src;
@@ -63,19 +73,14 @@ void sendAttack(struct EntityNode* attacker, struct EntityNode* defender, struct
 
 		toAdd->rect.x = attacker->rect.x + attacker->rect.w;
 		toAdd->rect.y = attacker->rect.y + 4;
-		toAdd->next = NULL;
+		toAdd->next = pl->head;
 		toAdd->src = attacker;
 		toAdd->origin = attacker;
 		toAdd->dest = defender;
 
-		if(pl->tail == NULL) {
-			pl->head = pl->tail = toAdd;
-		} else {
-			pl->tail->next = toAdd;
-			pl->tail = toAdd;
-		}
+		pl->head = toAdd;
 
-		set_entity_col((struct EntityNode*)toAdd, attacker->red, attacker->green, attacker->blue, attacker->alpha);
+		set_entity_col((struct EntityNode*)toAdd, attacker->red-115, attacker->green, attacker->blue, attacker->alpha);
 
 	}
 }
