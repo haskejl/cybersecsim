@@ -14,6 +14,15 @@ void run_simulation() {
 	struct EntityNode server;
 	struct PacketList packetList;
 
+	SDL_Rect text;
+	text.w = 400;
+	text.h = 26;
+	text.x = 100;
+	text.y = 400;
+
+	int money = 100000;
+	char str[50];
+
 	initPacketList(&packetList);
 
 	set_entity_col(&hacker, 255, 0, 0, 0);
@@ -56,6 +65,10 @@ void run_simulation() {
 			add_rect_to_scene(&curr->rect, curr->red, curr->green, curr->blue, curr->alpha);
 			curr = curr->next;
 		}
+
+		sprintf(str, "$%d", money);
+
+		add_text_to_scene(str, &text);
 
 		draw_scene();
 	}

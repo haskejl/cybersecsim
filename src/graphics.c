@@ -22,6 +22,15 @@ void add_rect_to_scene(SDL_Rect *rect, int r, int g, int b, int a) {
 	SDL_RenderFillRect(scene, rect);
 }
 
+void add_text_to_scene(const char* str, SDL_Rect* rect) {
+	surface = TTF_RenderUTF8_Solid(font, str, WHITE);
+	texture = SDL_CreateTextureFromSurface(scene, surface);
+	SDL_QueryTexture(texture, NULL, NULL, &rect->w, &rect->h);
+	SDL_RenderCopy(scene, texture, NULL, rect);
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(texture);
+}
+
 void clear_scene() {
 	// Clear the renderer
 	SDL_SetRenderDrawColor(scene, 0, 0, 0, 255);
